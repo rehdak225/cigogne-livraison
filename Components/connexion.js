@@ -3,6 +3,8 @@ import {View,Text,Keyboard,KeyboardAvoidingView,Image ,Pressable , TextInput,  T
 
 import { connect } from 'react-redux'
 
+import {signIn} from '../API/UserAPI'
+
 class Connexion extends React.Component{
 
 
@@ -10,8 +12,9 @@ class Connexion extends React.Component{
         super(props);
         this.state = {
             keyboardOffset: 0,
-            numero : 0,
+            email : "",
             password: "",
+            isLoading: false,
         };
         console.log(this.props.connected.user);
     }
@@ -59,12 +62,12 @@ class Connexion extends React.Component{
           
     }
 
-    _getPassword(pass){
+    _setPassword(pass){
         this.state.password = pass;
     }
 
-    _getNumero(numero){
-        this.state.numero = numero;
+    _setEmail(email){
+        this.state.email = email;
     }
 
     inscription(){
@@ -73,27 +76,64 @@ class Connexion extends React.Component{
 
 
     passOublie(){
-        this.props.navigation.navigate("PassOublie")
+        this.props.navigation.navigate("Forget");
     }
 
     connect(){
-        console.log(this.state.password);
-        connexion(this.state.numero,this.state.password).then((data)  =>
-        {if(data == false){
 
-            alert('Mauvais identifiant ou mot de passe')
+        if(this.state.email == ""){
+            alert("Veuillez entrez votre email svp");
+        }
+        else if(this.state.password == "" ){
+            alert("Veuillez entrez votre mot de passe svp");
+        }else if(!this.validateEmail(this.state.email)){
+
+            alert("Veuillez entrez un email correct svp");
         }else{
-            this.persistUser(data)
-        }}
+        this.setState({
+            isLoading: true,
+        })
+        signIn(this.state.email,this.state.password).then((data)  =>
+        {
+        if(data == false){
+            this.setState({
+                isLoading: false,
+            })
+            alert('Mauvais identifiant ou mot de passe');
+        }else{
+            this.setState({
+                isLoading: false,
+            })
+            this.persistUser(data);
+        }
+    }
       );
-
+    }
     }
 
     persistUser(user){
         const action = { type: "CONNECT_USER", value: user }
         this.props.dispatch(action)
+        if(user.roles.includes("ROLE_AGENCE"))
         this.props.navigation.navigate("Index")
+        else{
+
+        }
     }
+
+
+
+
+    _displayLoading(){
+        if(this.state.isLoading){
+        return (
+          <View style={{justifyContent: "center",position:"absolute",left:0,right:0,top:100}}>
+              <ActivityIndicator color="white" size="large"/>
+          </View>
+        )
+        }
+      }
+    
 
     onSubmitInscription = () =>{
         if(this.state.nom == ""){
@@ -111,6 +151,15 @@ class Connexion extends React.Component{
         }
     }
 
+
+    validateEmail = (email) => {
+        return String(email)
+          .toLowerCase()
+          .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          );
+      };
+
     render(){
         return(
             <SafeAreaView  style={styles.main_container}>
@@ -121,26 +170,25 @@ class Connexion extends React.Component{
                     <Text style={{color:'white'}}>Connexion</Text>
                         </View>
                         <View style={styles.bottomSection}>
+                            <KeyboardAvoidingView  behavior="padding">
                             <View style={{flex:1,justifyContent:'center',alignItems:'center',padding:5}}>
                                 <Image style={{width:100,height:100,borderRadius:10}} source={require('../Images/logo.png')} />
                                 <Text style={{color:"white",fontWeight:"bold",marginTop:5}}>Livraision</Text>
                             </View>
                             <View >
-                            <KeyboardAvoidingView  behavior="padding">
         <   TextInput style={textInput(this.state.keyboardOffset)}
 
-            onChangeText={text => this._getNumero(text)}
-            placeholder='numero de telephone'
+            onChangeText={text => this._setEmail(text)}
+            placeholder='Email'
             autoCapitalize="none"
-            keyboardType = 'numeric'
             placeholderTextColor='#929292'/>
             <TextInput   style={textInput(this.state.keyboardOffset)}
             secureTextEntry={true}
-            onChangeText={text => this._getPassword(text)}
+            onChangeText={text => this._setPassword(text)}
               placeholder='Mot de passe'
               autoCapitalize="none"
               placeholderTextColor='#929292'/>
-              </KeyboardAvoidingView>
+              {this._displayLoading()}
             </View>
              <TouchableHighlight  onPress={()=> this.connect()}style={button(this.state.keyboardOffset)}>
             <Text style={{textAlign:'center',fontSize:17,color:'white',paddingTop:8}}>Se Connecter</Text>
@@ -148,6 +196,7 @@ class Connexion extends React.Component{
                             <Text style={textBottom(this.state.keyboardOffset)}>Pas Encore de compte? Inscrivez vous !!<Text onPress={() => this.inscription()} style={{color:'white',fontWeight:"bold"}}>Ici</Text></Text>
                             <Text style={textBottom(this.state.keyboardOffset)}><Text onPress={() => this.passOublie()} style={{color:'white',fontWeight:"bold"}}>Mot de passe oublié?</Text></Text>
                            
+              </KeyboardAvoidingView>
                         </View>
                         </View>
                 </ImageBackground>

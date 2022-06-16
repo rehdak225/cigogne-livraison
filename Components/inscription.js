@@ -3,6 +3,8 @@ import {View,Text,Keyboard,KeyboardAvoidingView,Image ,Pressable , TextInput,  T
 
 import { connect } from 'react-redux'
 
+import {verifyNumber,verifyEmail,signUp} from '../API/UserAPI'
+
 class Inscription extends React.Component{
 
 
@@ -10,8 +12,13 @@ class Inscription extends React.Component{
         super(props);
         this.state = {
             keyboardOffset: 0,
+            nom:"",
+            email:"",
             numero : 0,
+            confPass:"",
             password: "",
+            isNumInside:false,
+            isLoading: false,
         };
         console.log(this.props.connected.user);
     }
@@ -32,6 +39,19 @@ class Inscription extends React.Component{
             this._keyboardDidHide,
         );
     }
+
+
+
+    _displayLoading(){
+        if(this.state.isLoading){
+        return (
+          <View style={{justifyContent: "center",position:"absolute",left:0,right:0,top:100}}>
+              <ActivityIndicator color="white" size="large"/>
+          </View>
+        )
+        }
+      }
+    
 
     componentWillUnmount() {
         this.keyboardDidShowListener.remove();
@@ -67,6 +87,18 @@ class Inscription extends React.Component{
         this.state.numero = numero;
     }
 
+
+    _getConfPass(conf){
+        this.state.confPass = conf;
+    }
+    _getNom(nom){
+        this.state.nom = nom;
+    }
+
+    _getEmail(email){
+        this.state.email = email;
+    }
+
     connexion(){
         this.props.navigation.navigate("Connexion")
     }
@@ -98,23 +130,66 @@ class Inscription extends React.Component{
     onSubmitInscription = () =>{
         if(this.state.nom == ""){
             alert("Veuillez entrez votre nom svp");
-        }else if(this.state.prenom == ""){
-            alert("Veuillez entrez votre prenom svp");
         }
         else if(this.state.numero == "" ){
-            
             alert("Veuillez entrez votre numero svp");
         }else if(this.state.numero.length != 10){
-
             alert("Veuillez entrez un numero correct svp");
+        }else if(!this.validateEmail(this.state.email)){
+            alert("Veuillez entrez un email correct svp");
+        }else if(this.state.password == ""){
+            alert("Veuillez entrer votre mot de passe svp");
+        }else if(this.state.confPass != this.state.password){
+            alert("Les deux mots de passes doivent correspondre");
         }else{
+            this.setState({isLoading : true})
+            verifyEmail(this.state.email).then((data)  =>
+            this.setState({
+              isNumInside : data,
+            },() => { 
+                if(this.state.isNumInside == true){
+                alert("Cet email existe déjà sur la plateform");
+                this.setState(
+                    {
+                        isLoading:false,
+                        isNumInside:false,
+                    }
+                );
+            }else if(this.state.isNumInside == false){
+                signUp(this.state.nom,this.state.email,this.state.numero,this.state.password).then((data)  =>
+                {if(data == true){
+                    this.setState(
+                        {
+                            isLoading:false,
+                        }
+                    );
+                    alert('Felicitation vous êtes desormais inscrit. Un email de confirmation vous a été envoyé');
+                }else{
+                    this.setState(
+                        {
+                            isLoading:false,
+                        }
+                    );
+                    alert('Une erreur  s\'est produite lors de l\'inscription. Veuillez svp verifier votre connexion internet.')
+                }});
+        } })
+        );
         }
     }
+
+    validateEmail = (email) => {
+        return String(email)
+          .toLowerCase()
+          .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          );
+      };
 
     render(){
         return(
             <SafeAreaView  style={styles.main_container}>
             <TouchableHighlight onPress={() => this._click(true)} style={{flex:1}} >
+
                 <ImageBackground blurRadius={1} source={require('../Images/Abidjan.jpg')} style={styles.mainImage}>
                     <View style={styles.overlay}>
                         <View style={styles.headerText}>
@@ -125,34 +200,41 @@ class Inscription extends React.Component{
                             <KeyboardAvoidingView  behavior="padding">
         <   TextInput style={textInput(this.state.keyboardOffset)}
 
-            onChangeText={text => this._getNumero(text)}
-            placeholder='numero de telephone'
+            onChangeText={text => this._getNom(text)}
+            placeholder='Entrez votre nom complet'
             autoCapitalize="none"
-            keyboardType = 'numeric'
             placeholderTextColor='#929292'/>
             <   TextInput style={textInput(this.state.keyboardOffset)}
     
                 onChangeText={text => this._getNumero(text)}
-                placeholder='numero de telephone'
+                placeholder='Entrez numero de telephone'
                 autoCapitalize="none"
                 keyboardType = 'numeric'
                 placeholderTextColor='#929292'/>
+        <   TextInput style={textInput(this.state.keyboardOffset)}
+
+onChangeText={text => this._getEmail(text)}
+placeholder='Entrez votre email'
+autoCapitalize="none"
+placeholderTextColor='#929292'/>
                 <   TextInput style={textInput(this.state.keyboardOffset)}
         
-                    onChangeText={text => this._getNumero(text)}
-                    placeholder='numero de telephone'
+                    onChangeText={text => this._getPassword(text)}
+                    placeholder='Entrez votre mot de passe'
+                    secureTextEntry={true}
                     autoCapitalize="none"
-                    keyboardType = 'numeric'
                     placeholderTextColor='#929292'/>
             <TextInput   style={textInput(this.state.keyboardOffset)}
             secureTextEntry={true}
-            onChangeText={text => this._getPassword(text)}
-              placeholder='Mot de passe'
+            onChangeText={text => this._getConfPass(text)}
+              placeholder='Veuillez confirmer votre mot de passe'
               autoCapitalize="none"
               placeholderTextColor='#929292'/>
+
+            {this._displayLoading()}
               </KeyboardAvoidingView>
             </View>
-             <TouchableHighlight  onPress={()=> this.connect()}style={button(this.state.keyboardOffset)}>
+             <TouchableHighlight  onPress={()=> this.onSubmitInscription()}style={button(this.state.keyboardOffset)}>
             <Text style={{textAlign:'center',fontSize:17,color:'white',paddingTop:8}}>S'inscrire</Text>
             </TouchableHighlight> 
                             <Text style={textBottom(this.state.keyboardOffset)}>Déjà inscrit?<Text onPress={() => this.connexion()} style={{color:'white',fontWeight:"bold"}}>Connexion</Text></Text>

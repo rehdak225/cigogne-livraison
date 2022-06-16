@@ -5,6 +5,7 @@ import {createAppContainer} from 'react-navigation'
 import Index from '../Components/index'
 import Connexion from '../Components/connexion'
 import Inscription from '../Components/inscription'
+import Forget from '../Components/forget'
 
 const ConnexionStackNavigator = createStackNavigator({
   
@@ -25,6 +26,12 @@ const ConnexionStackNavigator = createStackNavigator({
     navigationOptions: {
       headerShown: false,
     },
+    },
+    Forget: { // Ici j'ai appelé la vue "Search" mais on peut mettre ce que l'on veut. C'est le nom qu'on utilisera pour appeler cette vue
+      screen: Forget,
+      navigationOptions: {
+        headerShown: false,
+      },
     },
   })
   
