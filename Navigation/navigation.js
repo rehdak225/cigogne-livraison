@@ -6,6 +6,7 @@ import Index from '../Components/index'
 import Connexion from '../Components/connexion'
 import Inscription from '../Components/inscription'
 import Forget from '../Components/forget'
+import CreateAgence from '../Components/createAgence'
 
 const ConnexionStackNavigator = createStackNavigator({
   
@@ -17,6 +18,12 @@ const ConnexionStackNavigator = createStackNavigator({
     },
     Connexion: { // Ici j'ai appelé la vue "Search" mais on peut mettre ce que l'on veut. C'est le nom qu'on utilisera pour appeler cette vue
     screen: Connexion,
+    navigationOptions: {
+      headerShown: false,
+    },
+    },
+    CreateAgence: { // Ici j'ai appelé la vue "Search" mais on peut mettre ce que l'on veut. C'est le nom qu'on utilisera pour appeler cette vue
+    screen: CreateAgence,
     navigationOptions: {
       headerShown: false,
     },

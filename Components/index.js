@@ -38,7 +38,7 @@ class Index extends React.Component{
     isAgenceEmpty(){
         if(!this.state.myAgence || this.state.myAgence.length == 0){
             return(
-                <View style={{height:300,justifyContent:"center",alignItems:"center"}}>
+                <View style={{height:100,justifyContent:"center",alignItems:"center"}}>
 
                     <Icon size={35} color="rgb(65, 196, 170)"
                     name='list' />
@@ -53,6 +53,7 @@ class Index extends React.Component{
     render(){
         return(
         <View>
+        <ScrollView >
             <View style={{alignItems:"center"}}>
                 <Image
                 style={{width:"100%",height:300}}
@@ -62,7 +63,6 @@ class Index extends React.Component{
             
             <Text> Livraison</Text>
             </View>
-            <ScrollView>
                 <View>
             {this.isAgenceEmpty()}
                 <FlatList
@@ -79,9 +79,19 @@ class Index extends React.Component{
             <Text style={{textAlign:'center',fontSize:15,color:'black',}}>Deconnexion</Text>
             </TouchableHighlight> 
 
-            <TouchableHighlight  onPress={()=> this.onSubmitInscription()}style={{borderWidth:3,borderColor:"rgba(65, 196, 170,0.85)",alignItems:"center",justifyContent:"center",width:150,height:50,borderRadius:30}}>
+            <TouchableHighlight  onPress={()=> {this.props.navigation.navigate("CreateAgence");}}style={{borderWidth:3,borderColor:"rgba(65, 196, 170,0.85)",alignItems:"center",justifyContent:"center",width:150,height:50,borderRadius:30}}>
             <Text style={{textAlign:'center',fontSize:15,color:'black'}}>Creer une agence</Text>
             </TouchableHighlight> 
+
+                </View>
+                <View style={{justifyContent:"center",alignItems:"center",marginTop:25}}>
+
+            <TouchableHighlight  onPress={()=> this.onSubmitInscription()}style={{borderWidth:3,borderColor:"rgba(65, 196, 170,0.85)",alignItems:"center",justifyContent:"center",width:150,height:50,borderRadius:30}}>
+            <Text style={{textAlign:'center',fontSize:15,color:'black'}}>Nous contacter</Text>
+            </TouchableHighlight> 
+                </View>
+                <View style={{height:100}}>
+
                 </View>
             </ScrollView>
         </View>
